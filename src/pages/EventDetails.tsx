@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockEvents } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
-import { 
+import { useBooking } from '../context/BookingContext';
+import { useEvent } from '../context/EventContext';
+import BookingConfirmation from '../components/BookingConfirmation';
+import Calendar from '../components/Calendar';
+import { loadStripe } from '@stripe/stripe-js';
+import {
   CalendarIcon,
   MapPinIcon,
   UserGroupIcon,
@@ -11,30 +15,83 @@ import {
   SparklesIcon,
   CameraIcon,
   MusicalNoteIcon,
-  PaintBrushIcon
+  PaintBrushIcon,
+  CreditCardIcon,
+  BanknotesIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+
+// Service icons mapping
+const serviceIcons: Record<string, React.ReactElement> = {
+  'Photography': <CameraIcon className="h-6 w-6 text-primary-600" />,
+  'Catering': <SparklesIcon className="h-6 w-6 text-primary-600" />,
+  'Music': <MusicalNoteIcon className="h-6 w-6 text-primary-600" />,
+  'Decoration': <PaintBrushIcon className="h-6 w-6 text-primary-600" />,
+  'Venue': <MapPinIcon className="h-6 w-6 text-primary-600" />,
+};
 
 const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const { addBooking } = useBooking();
+  const { getEventWithAvailability, updateEventSlots, validateSlotAvailability } = useEvent();
+
   const [selectedDate, setSelectedDate] = useState('');
   const [guestCount, setGuestCount] = useState(1);
   const [customRequirements, setCustomRequirements] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'stripe' | 'card'>('cash');
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [bookingData, setBookingData] = useState<any>(null);
+  const [bookingError, setBookingError] = useState('');
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [stripe, setStripe] = useState<any>(null);
 
-  const event = mockEvents.find(e => e.id === id);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showCalendar) {
+        const target = event.target as Element;
+        if (!target.closest('.calendar-container')) {
+          setShowCalendar(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showCalendar]);
+
+  useEffect(() => {
+    const initializeStripe = async () => {
+      const stripeInstance = await loadStripe('pk_test_your_stripe_publishable_key_here');
+      setStripe(stripeInstance);
+    };
+
+    initializeStripe();
+  }, []);
+
+  const event = id ? getEventWithAvailability(id) : undefined;
+  const availableSlots = event ? event.availableSlots : 0;
+
+  // Generate available dates (next 30 days as an example)
+  const availableDates = React.useMemo(() => {
+    const dates: string[] = [];
+    const today = new Date();
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(date.toISOString().split('T')[0]);
+    }
+    return dates;
+  }, []);
 
   if (!event) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Event not found</h2>
-          <button
-            onClick={() => navigate('/events')}
-            className="btn-primary"
-          >
+          <button onClick={() => navigate('/events')} className="btn-primary">
             Back to Events
           </button>
         </div>
@@ -42,26 +99,8 @@ const EventDetails: React.FC = () => {
     );
   }
 
-  const serviceIcons: { [key: string]: React.ReactNode } = {
-    'Catering': <CheckCircleIcon className="h-6 w-6" />,
-    'Photography': <CameraIcon className="h-6 w-6" />,
-    'Music': <MusicalNoteIcon className="h-6 w-6" />,
-    'Decoration': <PaintBrushIcon className="h-6 w-6" />,
-    'DJ Performance': <MusicalNoteIcon className="h-6 w-6" />,
-    'Bar': <CheckCircleIcon className="h-6 w-6" />,
-    'Food Court': <CheckCircleIcon className="h-6 w-6" />,
-    'Security': <CheckCircleIcon className="h-6 w-6" />,
-    'Networking': <SparklesIcon className="h-6 w-6" />,
-    'Awards Ceremony': <StarIconSolid className="h-6 w-6 text-yellow-400" />,
-    'Fine Dining': <CheckCircleIcon className="h-6 w-6" />,
-    'Entertainment': <MusicalNoteIcon className="h-6 w-6" />,
-    'Cultural Performances': <SparklesIcon className="h-6 w-6" />,
-    'Traditional Food': <CheckCircleIcon className="h-6 w-6" />,
-    'Fireworks': <SparklesIcon className="h-6 w-6" />,
-    'Decorations': <PaintBrushIcon className="h-6 w-6" />,
-    'Photo Booth': <CameraIcon className="h-6 w-6" />,
-    'Games': <SparklesIcon className="h-6 w-6" />,
-    'Cake': <CheckCircleIcon className="h-6 w-6" />
+  const calculateTotalPrice = () => {
+    return event.price * guestCount;
   };
 
   const handleBooking = () => {
@@ -72,30 +111,87 @@ const EventDetails: React.FC = () => {
     setShowBookingForm(true);
   };
 
-  const calculateTotalPrice = () => {
-    return event.price * guestCount;
-  };
-
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const bookingData = {
-      eventId: event.id,
+    setBookingError('');
+
+    if (!validateSlotAvailability(event.id, guestCount)) {
+      setBookingError(`Only ${availableSlots} slots available.`);
+      return;
+    }
+
+    if (!user) {
+      setBookingError('Please login to make a booking.');
+      navigate('/login');
+      return;
+    }
+
+    // Debug: Log the event object to see what we're working with
+    console.log('Event object:', event);
+    console.log('Event ID:', event.id);
+    console.log('User object:', user);
+    console.log('User ID:', (user as any)._id || user.id);
+
+    // Create booking object with required fields
+    // Remove the 'id' and 'createdAt' fields - MongoDB will generate these
+    const bookingPayload = {
+      eventId: event.id, // Use event.id which should be the MongoDB _id
       eventTitle: event.title,
       date: selectedDate,
       time: event.time,
       guestCount,
       totalPrice: calculateTotalPrice(),
       customRequirements,
-      userId: user?.id,
-      status: 'pending' as const,
-      createdAt: new Date().toISOString()
+      paymentMethod,
+      userId: (user as any)._id || user.id,
+      status: 'confirmed' as const,
+      location: event.location,
+      image: event.image,
     };
 
-    console.log('Booking submitted:', bookingData);
-    
-    alert('Booking confirmed! You will receive a confirmation email shortly.');
-    navigate('/profile');
+    console.log('Booking payload:', bookingPayload);
+
+    // Create local booking object with generated fields for state management
+    const booking = {
+      ...bookingPayload,
+      id: `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      if (paymentMethod === 'stripe' && stripe) {
+        const stripeResponse = await simulateStripePayment(bookingPayload.totalPrice);
+        if (!stripeResponse.success) {
+          setBookingError('Payment failed. Please try again.');
+          return;
+        }
+      }
+
+      // Send bookingPayload (without id and createdAt) to backend
+      const response = await addBooking(bookingPayload as any);
+      updateEventSlots(event.id, guestCount);
+
+      // Use the response from backend or the local booking object for display
+      setBookingData(response || booking);
+      setShowConfirmation(true);
+      setShowBookingForm(false);
+
+      setSelectedDate('');
+      setGuestCount(1);
+      setCustomRequirements('');
+      setPaymentMethod('cash');
+    } catch (error) {
+      setBookingError('Failed to complete booking. Please try again.');
+      console.error('Booking error:', error);
+    }
+  };
+
+  const simulateStripePayment = async (amount: number): Promise<{ success: boolean }> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true });
+      }, 2000);
+    });
   };
 
   return (
@@ -242,18 +338,53 @@ const EventDetails: React.FC = () => {
                 </button>
               ) : (
                 <form onSubmit={handleBookingSubmit} className="space-y-4">
+                  {bookingError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                      {bookingError}
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Select Date
                     </label>
-                    <input
-                      type="date"
-                      required
-                      className="input-field"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      min={event.date}
-                    />
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowCalendar(!showCalendar)}
+                        className="w-full input-field text-left flex items-center justify-between"
+                      >
+                        <span className={selectedDate ? 'text-gray-900' : 'text-gray-500'}>
+                          {selectedDate 
+                            ? new Date(selectedDate).toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })
+                            : 'Choose a date'
+                          }
+                        </span>
+                        <CalendarIcon className="h-5 w-5 text-gray-400" />
+                      </button>
+                      
+                      {showCalendar && (
+                        <div className="absolute z-10 mt-2 w-full calendar-container">
+                          <Calendar
+                            selectedDate={selectedDate}
+                            onDateSelect={(date) => {
+                              setSelectedDate(date);
+                              setShowCalendar(false);
+                            }}
+                            availableDates={availableDates}
+                            minDate={new Date().toISOString().split('T')[0]}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {availableSlots > 0 ? `${availableSlots} slots available` : 'No slots available'}
+                    </p>
                   </div>
 
                   <div>
@@ -264,13 +395,13 @@ const EventDetails: React.FC = () => {
                       type="number"
                       required
                       min="1"
-                      max={Math.min(event.availableSlots, 10)}
+                      max={Math.min(availableSlots, 15)}
                       className="input-field"
                       value={guestCount}
                       onChange={(e) => setGuestCount(Number(e.target.value))}
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Maximum {Math.min(event.availableSlots, 10)} guests
+                      Maximum {Math.min(availableSlots, 15)} guests
                     </p>
                   </div>
 
@@ -285,6 +416,63 @@ const EventDetails: React.FC = () => {
                       value={customRequirements}
                       onChange={(e) => setCustomRequirements(e.target.value)}
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Payment Method
+                    </label>
+                    <div className="space-y-3">
+                      <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="cash"
+                          checked={paymentMethod === 'cash'}
+                          onChange={(e) => setPaymentMethod(e.target.value as 'cash' | 'stripe' | 'card')}
+                          className="mr-3"
+                        />
+                        <BanknotesIcon className="h-5 w-5 text-green-600 mr-2" />
+                        <div>
+                          <span className="font-medium text-gray-900">Cash</span>
+                          <p className="text-xs text-gray-500">Pay at the venue</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="stripe"
+                          checked={paymentMethod === 'stripe'}
+                          onChange={(e) => setPaymentMethod(e.target.value as 'cash' | 'stripe' | 'card')}
+                          className="mr-3"
+                        />
+                        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-2">
+                          <span className="text-white text-xs font-bold">S</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-900">Stripe</span>
+                          <p className="text-xs text-gray-500">Secure card payment</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="card"
+                          checked={paymentMethod === 'card'}
+                          onChange={(e) => setPaymentMethod(e.target.value as 'cash' | 'stripe' | 'card')}
+                          className="mr-3"
+                        />
+                        <CreditCardIcon className="h-5 w-5 text-blue-600 mr-2" />
+                        <div>
+                          <span className="font-medium text-gray-900">Credit/Debit Card</span>
+                          <p className="text-xs text-gray-500">Direct card payment</p>
+                        </div>
+                      </label>
+                    </div>
                   </div>
 
                   <div className="border-t pt-4">
@@ -339,6 +527,13 @@ const EventDetails: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Booking Confirmation Popup */}
+      <BookingConfirmation
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        bookingData={bookingData}
+      />
     </div>
   );
 };

@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { mockEvents, mockCategories } from '../data/mockData';
-import { Event, EventFilters } from '../types';
+import { useSearchParams, Link } from 'react-router-dom';
+import { useEvent } from '../context/EventContext';
+import { mockCategories } from '../data/mockData';
+import { EventFilters } from '../types';
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
+  StarIcon as StarIconSolid,
   XMarkIcon,
   CalendarIcon,
   MapPinIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
 const Events: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [events] = useState<Event[]>(mockEvents);
+  const { events, getEventWithAvailability } = useEvent();
   const [filters, setFilters] = useState<EventFilters>({
     category: searchParams.get('category') || undefined,
     search: searchParams.get('search') || undefined,
@@ -25,6 +26,12 @@ const Events: React.FC = () => {
     sortOrder: 'asc'
   });
   const [showFilters, setShowFilters] = useState(false);
+
+  // Get events with availability for display
+  const eventsWithAvailability = events.map(event => ({
+    ...event,
+    availableSlots: getEventWithAvailability(event.id)?.availableSlots || 0
+  }));
 
   useEffect(() => {
     const newParams = new URLSearchParams();
@@ -37,7 +44,7 @@ const Events: React.FC = () => {
   }, [filters, setSearchParams]);
 
   const filteredAndSortedEvents = useMemo(() => {
-    let filtered = events.filter(event => {
+    let filtered = eventsWithAvailability.filter(event => {
       if (filters.category && event.category !== filters.category) return false;
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -72,7 +79,7 @@ const Events: React.FC = () => {
     });
 
     return filtered;
-  }, [events, filters]);
+  }, [eventsWithAvailability, filters]);
 
   const handleFilterChange = (newFilters: Partial<EventFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));

@@ -37,6 +37,8 @@ export interface Booking {
   customRequirements?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: string;
+  location: string;
+  image: string;
 }
 
 export interface User {

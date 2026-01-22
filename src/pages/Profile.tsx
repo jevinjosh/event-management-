@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useBooking } from '../context/BookingContext';
+import CancellationConfirmation from '../components/CancellationConfirmation';
 import { 
   UserCircleIcon,
   CalendarIcon,
@@ -9,49 +11,17 @@ import {
   ArrowRightOnRectangleIcon,
   CheckCircleIcon,
   ClockIcon,
-  XCircleIcon
+  XCircleIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 const Profile: React.FC = () => {
   const { user, logout } = useAuth();
+  const { bookings, cancelBooking } = useBooking();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'bookings' | 'profile'>('bookings');
-
-  const mockBookings = [
-    {
-      id: '1',
-      eventTitle: 'Luxury Garden Wedding',
-      date: '2024-06-15',
-      time: '18:00',
-      guestCount: 50,
-      totalPrice: 750000,
-      status: 'confirmed' as const,
-      location: 'Sunset Gardens, Mumbai',
-      image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=500'
-    },
-    {
-      id: '2',
-      eventTitle: 'Summer DJ Festival',
-      date: '2024-07-01',
-      time: '20:00',
-      guestCount: 5,
-      totalPrice: 4000,
-      status: 'pending' as const,
-      location: 'Beach Club, Goa',
-      image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500'
-    },
-    {
-      id: '3',
-      eventTitle: 'Corporate Gala',
-      date: '2024-05-10',
-      time: '18:30',
-      guestCount: 20,
-      totalPrice: 100000,
-      status: 'cancelled' as const,
-      location: 'Grand Hotel, Bangalore',
-      image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500'
-    }
-  ];
+  const [showCancellationPopup, setShowCancellationPopup] = useState(false);
+  const [cancelledBooking, setCancelledBooking] = useState<any>(null);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -77,6 +47,22 @@ const Profile: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleCancelBooking = (bookingId: string) => {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (booking) {
+      cancelBooking(bookingId);
+      
+      // Show cancellation popup
+      setCancelledBooking(booking);
+      setShowCancellationPopup(true);
+    }
+  };
+
+  const handleCloseCancellationPopup = () => {
+    setShowCancellationPopup(false);
+    setCancelledBooking(null);
   };
 
   const handleLogout = () => {
@@ -189,14 +175,14 @@ const Profile: React.FC = () => {
               </button>
             </div>
 
-            {mockBookings.length > 0 ? (
+            {bookings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockBookings.map((booking) => (
+                {bookings.map((booking) => (
                   <div key={booking.id} className="card">
                     <div className="relative h-48 overflow-hidden">
                       <img
-                        src={booking.image}
-                        alt={booking.eventTitle}
+                        src={booking.image || 'https://images.unsplash.com/photo-1511792441307-afdd9de73a28?w=800'}
+                        alt={booking.eventTitle || 'Event'}
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-4 right-4">
@@ -207,30 +193,41 @@ const Profile: React.FC = () => {
                       </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{booking.eventTitle}</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{booking.eventTitle || 'Event Title'}</h3>
                       
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center text-sm text-gray-600">
                           <CalendarIcon className="h-4 w-4 mr-2 text-primary-600" />
-                          {new Date(booking.date).toLocaleDateString()} at {booking.time}
+                          {booking.date ? new Date(booking.date).toLocaleDateString() : 'Date not set'} at {booking.time || 'Time not set'}
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                           <UserCircleIcon className="h-4 w-4 mr-2 text-primary-600" />
-                          {booking.guestCount} guests
+                          {booking.guestCount || 0} guests
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                           <TicketIcon className="h-4 w-4 mr-2 text-primary-600" />
-                          {booking.location}
+                          {booking.location || 'Location not set'}
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-bold text-primary-600">
-                          ₹{booking.totalPrice.toLocaleString()}
+                          ₹{booking.totalPrice?.toLocaleString() || '0'}
                         </span>
-                        <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">
-                          View Details →
-                        </button>
+                        <div className="flex space-x-2">
+                          {booking.status !== 'cancelled' && (
+                            <button
+                              onClick={() => handleCancelBooking(booking.id)}
+                              className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex items-center"
+                            >
+                              <XMarkIcon className="h-4 w-4 mr-1" />
+                              Cancel
+                            </button>
+                          )}
+                          <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">
+                            View Details →
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -322,6 +319,17 @@ const Profile: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Cancellation Confirmation Popup */}
+      {cancelledBooking && (
+        <CancellationConfirmation
+          isOpen={showCancellationPopup}
+          onClose={handleCloseCancellationPopup}
+          bookingTitle={cancelledBooking.eventTitle}
+          bookingDate={cancelledBooking.date}
+          guestCount={cancelledBooking.guestCount}
+        />
+      )}
     </div>
   );
 };

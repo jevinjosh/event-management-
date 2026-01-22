@@ -1,11 +1,20 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { AuthState, User } from '../types';
-import { mockUser } from '../data/mockData';
+import { authAPI } from '../services/api';
+
+// 🔥 Proper input type for registration
+type RegisterInput = {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  role: 'user' | 'admin';
+};
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<boolean>;
+  register: (userData: RegisterInput) => Promise<boolean>;
 }
 
 const initialState: AuthState = {
@@ -61,7 +70,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -73,14 +82,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('userData');
-    
+    const loginTime = localStorage.getItem('loginTime');
+
     if (token && userData) {
       try {
         const user = JSON.parse(userData);
+
+        if (loginTime) {
+          const currentTime = Date.now();
+          const sessionTime = parseInt(loginTime);
+          const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+
+          if (currentTime - sessionTime > twoDaysInMs) {
+            localStorage.clear();
+            dispatch({ type: 'SET_LOADING', payload: false });
+            return;
+          }
+        }
+
         dispatch({ type: 'INIT_AUTH', payload: { user, token } });
       } catch (error) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
+        localStorage.clear();
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     } else {
@@ -91,58 +113,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (email === 'admin@eventhub.com' && password === 'admin123') {
-        const adminUser = { ...mockUser, role: 'admin' as const, name: 'Admin User' };
-        const token = 'mock-admin-token';
-        localStorage.setItem('token', token);
-        localStorage.setItem('userData', JSON.stringify(adminUser));
-        dispatch({ type: 'LOGIN_SUCCESS', payload: { user: adminUser, token } });
-        return true;
-      } else if (email === mockUser.email && password === 'password') {
-        const token = 'mock-user-token';
-        localStorage.setItem('token', token);
-        localStorage.setItem('userData', JSON.stringify(mockUser));
-        dispatch({ type: 'LOGIN_SUCCESS', payload: { user: mockUser, token } });
-        return true;
-      }
-      
-      dispatch({ type: 'SET_LOADING', payload: false });
-      return false;
+
+      const response = await authAPI.login(email, password);
+
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('userData', JSON.stringify(response.user));
+      localStorage.setItem('loginTime', Date.now().toString());
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: { user: response.user, token: response.token },
+      });
+
+      return true;
     } catch (error) {
+      console.error('Login failed:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
       return false;
     }
   };
 
-  const register = async (userData: Omit<User, 'id' | 'createdAt'>): Promise<boolean> => {
+  const register = async (userData: RegisterInput): Promise<boolean> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newUser: User = {
-        ...userData,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-      };
-      
-      const token = 'mock-new-user-token';
-      localStorage.setItem('token', token);
-      localStorage.setItem('userData', JSON.stringify(newUser));
-      dispatch({ type: 'LOGIN_SUCCESS', payload: { user: newUser, token } });
+
+      const response = await authAPI.register(userData);
+
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('userData', JSON.stringify(response.user));
+      localStorage.setItem('loginTime', Date.now().toString());
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: { user: response.user, token: response.token },
+      });
+
       return true;
     } catch (error) {
+      console.error('Registration failed:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
       return false;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userData');
+    localStorage.clear();
     dispatch({ type: 'LOGOUT' });
   };
 
