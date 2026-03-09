@@ -1,0 +1,22 @@
+[31m???[39m Build failed in 1.72s
+[31merror during build:
+[31msrc/pages/Home.jsx (18:9): "whyChoose" is not exported by "src/data/whyChoose.js", imported by "src/pages/Home.jsx".[31m
+file: [36mC:/Users/Jevin Josh/Downloads/EventOrg/client/src/pages/Home.jsx:18:9[31m
+[33m
+16: import { faqs } from '../data/faqs';
+17: import { stats } from '../data/stats';
+18: import { whyChoose } from '../data/whyChoose';
+             ^
+19: 
+20: export default function Home() {
+[31m
+    at getRollupError (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at Module.error (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
+    at Module.traceVariable (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
+    at ModuleScope.findVariable (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
+    at FunctionScope.findVariable (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at FunctionBodyScope.findVariable (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at MemberExpression.bind (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:7392:49)
+    at CallExpression.bind (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:2829:23)
+    at CallExpression.bind (file:///C:/Users/Jevin%20Josh/Downloads/EventOrg/client/node_modules/rollup/dist/es/shared/node-entry.js:12179:15)[39m

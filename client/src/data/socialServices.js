@@ -1,0 +1,200 @@
+export const socialServices = [
+    {
+        id: 1,
+        name: "Wedding Planning & Management",
+        slug: "wedding",
+        icon: "💍",
+        image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80",
+        shortDesc: "Bespoke wedding ceremonies crafted with love and precision",
+        category: "wedding",
+        description: "Your wedding day is the most important milestone of your life, and at EventHub Chennai, we ensure it is nothing short of magical. From grand mandap setups to intimate beach weddings, our team handles every element — décor, catering, entertainment, invitations, photography, and coordination. We blend tradition with modern elegance, creating bespoke wedding experiences that reflect your unique love story. Let us handle the stress while you enjoy every moment of your special day.",
+        features: ["Complete venue decoration & mandap setup", "Catering & menu planning", "Photography & videography coordination", "Guest management & hospitality", "Entertainment & music arrangements", "Bridal styling coordination"]
+    },
+    {
+        id: 2,
+        name: "Reception Events",
+        slug: "reception",
+        icon: "🥂",
+        image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80",
+        shortDesc: "Elegant reception events that leave guests mesmerized",
+        category: "wedding",
+        description: "Make your reception an evening to remember. Our team curates stunning reception events with breathtaking stage designs, exquisite lighting, gourmet dining, and entertainment that wows every guest. We manage everything from the theme and décor to the guest flow and timeline, ensuring a seamless celebration.",
+        features: ["Grand stage & lighting design", "Theme-based décor", "Gourmet catering & bar services", "DJ & live entertainment", "Photo booth & guest engagement", "Timeline coordination"]
+    },
+    {
+        id: 3,
+        name: "Engagement Ceremony",
+        slug: "engagement",
+        icon: "💫",
+        image: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80",
+        shortDesc: "Beautiful engagement celebrations tailored to your love story",
+        category: "wedding",
+        description: "Celebrate the beginning of your forever with a beautifully orchestrated engagement ceremony. We create intimate and elegant setups with floral arrangements, ring ceremony coordination, and family-friendly entertainment. Every detail is designed to make your special moment truly unforgettable.",
+        features: ["Elegant ring ceremony setup", "Floral & stage decoration", "Photography arrangements", "Family coordination", "Catering services", "Return gift management"]
+    },
+    {
+        id: 4,
+        name: "Birthday Parties (Kids & Adults)",
+        slug: "birthday",
+        icon: "🎂",
+        image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80",
+        shortDesc: "Magical birthday celebrations for all ages and themes",
+        category: "celebrations",
+        description: "Whether it's a magical princess party for your little one or a sophisticated milestone celebration, we create birthday events that are tailored to your vision. Our team handles theme selection, venue decoration, entertainment, cake design coordination, catering, and activities that keep guests engaged and happy.",
+        features: ["Custom theme design", "Balloon & party decoration", "Entertainment & games", "Cake design coordination", "Catering & snacks", "Return gifts & souvenirs"]
+    },
+    {
+        id: 5,
+        name: "Baby Shower",
+        slug: "baby-shower",
+        icon: "🍼",
+        image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80",
+        shortDesc: "Warm and joyful baby shower events filled with memories",
+        category: "celebrations",
+        description: "Welcome your bundle of joy with a beautifully planned baby shower celebration. We create warm, joyful atmospheres with pastel themes, fun games, heartfelt moments, and delicious food that bring family and friends together to celebrate this special milestone.",
+        features: ["Theme-based décor (boy/girl/neutral)", "Fun games & activities", "Gift registry coordination", "Photography sessions", "Catering & dessert table", "Keepsake creation"]
+    },
+    {
+        id: 6,
+        name: "Naming Ceremony",
+        slug: "naming-ceremony",
+        icon: "🌸",
+        image: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=800&q=80",
+        shortDesc: "Traditional and modern naming ceremonies with grace",
+        category: "celebrations",
+        description: "Mark your baby's naming ceremony with grace and tradition. We blend cultural rituals with modern aesthetics, creating a beautiful celebration that honors your heritage while making it a memorable event for all your loved ones.",
+        features: ["Traditional ritual setup", "Elegant decoration", "Priest/pandit coordination", "Photography & videography", "Catering arrangements", "Guest hospitality"]
+    },
+    {
+        id: 7,
+        name: "Puberty Function",
+        slug: "puberty-function",
+        icon: "🌺",
+        image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&q=80",
+        shortDesc: "Dignified and elegant puberty ceremonies with cultural touch",
+        category: "celebrations",
+        description: "We organize dignified and culturally rich puberty ceremonies that honor tradition while adding a touch of modern elegance. Our team handles venue decoration, catering, music, and all the arrangements to make this coming-of-age celebration a beautiful memory.",
+        features: ["Traditional setup & decoration", "Cultural program coordination", "Catering & menu planning", "Music & entertainment", "Photography services", "Guest management"]
+    },
+    {
+        id: 8,
+        name: "Housewarming / Griha Pravesh",
+        slug: "housewarming",
+        icon: "🏠",
+        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+        shortDesc: "Auspicious housewarming events with traditional rituals",
+        category: "celebrations",
+        description: "Step into your new home with blessings and celebrations. We organize auspicious housewarming ceremonies with traditional poojas, beautiful floral decorations, catering, and guest management that makes this milestone a joyful occasion for your family.",
+        features: ["Pooja & ritual arrangements", "Floral & rangoli decoration", "Catering & prasad", "Priest coordination", "Guest seating & hospitality", "Photography services"]
+    },
+    {
+        id: 9,
+        name: "Anniversary Celebrations",
+        slug: "anniversary",
+        icon: "💑",
+        image: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800&q=80",
+        shortDesc: "Romantic anniversary events celebrating your milestones",
+        category: "celebrations",
+        description: "Celebrate years of love and togetherness with a beautifully planned anniversary celebration. From intimate dinners to grand parties, we create the perfect setting to honor your journey together with elegance and romance.",
+        features: ["Romantic venue decoration", "Customized themes", "Gourmet dinner arrangements", "Entertainment & music", "Photo & video memories", "Cake & dessert coordination"]
+    },
+    {
+        id: 10,
+        name: "Get-togethers & Reunions",
+        slug: "get-together",
+        icon: "🎊",
+        image: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800&q=80",
+        shortDesc: "Fun and memorable reunion events for friends and family",
+        category: "celebrations",
+        description: "Bring people together for unforgettable get-togethers and reunion events. Whether it's a family reunion, college batch meet, or friend circle gathering, we create fun, engaging environments with activities, food, and entertainment.",
+        features: ["Venue selection & setup", "Fun activities & games", "Catering & refreshments", "Music & entertainment", "Photography services", "Custom memorabilia"]
+    },
+    {
+        id: 11,
+        name: "Diwali Event Management",
+        slug: "diwali",
+        icon: "🪔",
+        image: "https://images.unsplash.com/photo-1574265365637-2aa19a85e8df?w=800&q=80",
+        shortDesc: "Vibrant Diwali celebrations full of lights and joy",
+        category: "cultural",
+        description: "Light up your Diwali celebrations with our expertly managed events. We create vibrant, joyful Diwali parties with stunning lighting, traditional décor, rangoli, fireworks coordination, and festive catering that captures the spirit of the festival of lights.",
+        features: ["Diya & light decoration", "Rangoli & traditional setup", "Fireworks coordination", "Festive catering", "Cultural performances", "Gift distribution"]
+    },
+    {
+        id: 12,
+        name: "Pongal Event Management",
+        slug: "pongal",
+        icon: "🌾",
+        image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=800&q=80",
+        shortDesc: "Traditional Pongal events celebrating harvest and culture",
+        category: "cultural",
+        description: "Celebrate the harvest festival with authentic Pongal event management. We organize traditional kolam competitions, pot decoration, cooking events, and cultural programs that bring the warmth of Tamil tradition to life.",
+        features: ["Traditional Pongal setup", "Kolam & pot decoration", "Cultural programs", "Traditional catering", "Bull taming references/activities", "Photography & documentation"]
+    },
+    {
+        id: 13,
+        name: "Christmas Event Management",
+        slug: "christmas",
+        icon: "🎄",
+        image: "https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800&q=80",
+        shortDesc: "Festive Christmas events with warmth and celebration",
+        category: "cultural",
+        description: "Spread holiday cheer with professionally managed Christmas events. From stunning Christmas tree setups and winter wonderland themes to carol nights, Santa visits, and festive feasts, we create magical Christmas celebrations for families and corporates alike.",
+        features: ["Christmas tree & winter décor", "Santa Claus arrangements", "Carol night & music", "Festive catering", "Gift exchange coordination", "Kids' activity zone"]
+    },
+    {
+        id: 14,
+        name: "New Year Event Management",
+        slug: "new-year",
+        icon: "🎆",
+        image: "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80",
+        shortDesc: "Spectacular New Year celebrations welcoming new beginnings",
+        category: "cultural",
+        description: "Ring in the New Year with a spectacular celebration managed by our expert team. We create unforgettable New Year parties with live entertainment, countdown setups, gourmet dining, and dazzling décor that sets the tone for an amazing year ahead.",
+        features: ["Countdown stage & setup", "Live DJ & entertainment", "Gourmet dinner & bar", "Fireworks coordination", "Photo booth & memories", "VIP lounge management"]
+    },
+    {
+        id: 15,
+        name: "Cultural Programs & Traditional Events",
+        slug: "cultural",
+        icon: "🎭",
+        image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
+        shortDesc: "Dance, Music, Chenda Melam, Folk Arts and more",
+        category: "cultural",
+        description: "Celebrate India's rich cultural heritage with professionally organized cultural programs. We coordinate traditional dance performances, music recitals, Chenda Melam, folk arts, and cultural exhibitions that showcase talent and honor traditions with grandeur.",
+        features: ["Artist & performer coordination", "Stage & sound setup", "Traditional decoration", "Program scheduling", "Audience management", "Documentation & recording"]
+    },
+    {
+        id: 16,
+        name: "School & College Events",
+        slug: "school-college",
+        icon: "🎓",
+        image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80",
+        shortDesc: "Annual Day, Farewell, Cultural Fests executed flawlessly",
+        category: "cultural",
+        description: "Make your school or college events memorable with our professional event management. We handle Annual Day celebrations, farewell parties, cultural festivals, sports days, and graduation ceremonies with creative themes and flawless execution.",
+        features: ["Stage & auditorium setup", "Sound & lighting", "Creative theme design", "Program coordination", "Prize & certificate management", "Photography & videography"]
+    },
+    {
+        id: 17,
+        name: "Community / Public Events",
+        slug: "community",
+        icon: "🏘️",
+        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80",
+        shortDesc: "Fairs, exhibitions, and local gatherings organized perfectly",
+        category: "cultural",
+        description: "We organize large-scale community events, public fairs, exhibitions, and local gatherings with professional crowd management, vendor coordination, entertainment, and safety measures that ensure a successful and enjoyable event for all attendees.",
+        features: ["Venue & ground setup", "Vendor & stall coordination", "Crowd management", "Entertainment programs", "Safety & security", "Permit & logistics handling"]
+    },
+    {
+        id: 18,
+        name: "Luxury Lifestyle Events",
+        slug: "luxury-lifestyle",
+        icon: "👑",
+        image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
+        shortDesc: "Exclusive luxury events designed for the discerning few",
+        category: "celebrations",
+        description: "Experience the pinnacle of event luxury with our bespoke lifestyle event management. From exclusive yacht parties to private gala dinners, we create ultra-premium experiences with world-class catering, designer décor, and VIP-level hospitality for the most discerning clients.",
+        features: ["Exclusive venue sourcing", "Designer décor & styling", "Premium catering & bar", "VIP hospitality services", "Celebrity entertainment", "Personalized concierge"]
+    }
+];
